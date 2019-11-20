@@ -7,6 +7,7 @@ sys.path.append('/content/Speaker-Diarization/visualization')
 import toolkits
 import model as spkModel
 import os
+from viewer import PlotDiar
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -189,6 +190,9 @@ def main(wav_path, embedding_per_second=1.0, overlap_rate=0.5):
             results.append(s+' ==> '+e+'\n')
     with open('/content/results.txt', 'w') as file:
         file.writelines(results)
+    p = PlotDiar(map=speakerSlice, wav=wav_path, gui=True, size=(25, 6))
+    p.draw()
+    p.plot.show()
 
 if __name__ == '__main__':
     main(r'/content/Bdb001.interaction.wav', embedding_per_second=1.2, overlap_rate=0.4)
