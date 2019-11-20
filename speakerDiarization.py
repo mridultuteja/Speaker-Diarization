@@ -1,25 +1,18 @@
-
-"""A demo script showing how to DIARIZATION ON WAV USING UIS-RNN."""
-
 import numpy as np
 import uisrnn
 import librosa
 import sys
-sys.path.append('ghostvlad')
-sys.path.append('visualization')
+sys.path.append('/content/Speaker-Diarization/ghostvlad')
+sys.path.append('/content/Speaker-Diarization/visualization')
 import toolkits
 import model as spkModel
 import os
-from viewer import PlotDiar
 
-# ===========================================
-#        Parse the argument
-# ===========================================
 import argparse
 parser = argparse.ArgumentParser()
 # set up training configuration.
 parser.add_argument('--gpu', default='', type=str)
-parser.add_argument('--resume', default=r'ghostvlad/pretrained/weights.h5', type=str)
+parser.add_argument('--resume', default=r'/content/Speaker-Diarization/ghostvlad/pretrained/weights.h5', type=str)
 parser.add_argument('--data_path', default='4persons', type=str)
 # set up network configuration.
 parser.add_argument('--net', default='resnet34s', choices=['resnet34s', 'resnet34l'], type=str)
@@ -35,7 +28,7 @@ global args
 args = parser.parse_args()
 
 
-SAVED_MODEL_NAME = 'pretrained/saved_model.uisrnn_benchmark'
+SAVED_MODEL_NAME = '/content/Speaker-Diarization/pretrained/saved_model.uisrnn_benchmark'
 
 def append2dict(speakerSlice, spk_period):
     key = list(spk_period.keys())[0]
@@ -96,12 +89,6 @@ def lin_spectogram_from_wav(wav, hop_length, win_length, n_fft=1024):
     return linear.T
 
 
-# 0s        1s        2s                  4s                  6s
-# |-------------------|-------------------|-------------------|
-# |-------------------|
-#           |-------------------|
-#                     |-------------------|
-#                               |-------------------|
 def load_data(path, win_length=400, sr=16000, hop_length=160, n_fft=512, embedding_per_second=0.5, overlap_rate=0.5):
     wav, intervals = load_wav(path, sr=sr)
     linear_spect = lin_spectogram_from_wav(wav, hop_length, win_length, n_fft)
@@ -189,20 +176,19 @@ def main(wav_path, embedding_per_second=1.0, overlap_rate=0.5):
 
             speakerSlice[spk][tid]['start'] = s
             speakerSlice[spk][tid]['stop'] = e
-
+    results = []
     for spk,timeDicts in speakerSlice.items():
         print('========= ' + str(spk) + ' =========')
+        results.append('========= ' + str(spk) + ' ========= \n')
         for timeDict in timeDicts:
             s = timeDict['start']
             e = timeDict['stop']
             s = fmtTime(s)  # change point moves to the center of the slice
             e = fmtTime(e)
             print(s+' ==> '+e)
-
-    p = PlotDiar(map=speakerSlice, wav=wav_path, gui=True, size=(25, 6))
-    p.draw()
-    p.plot.show()
+            results.append(s+' ==> '+e+'\n')
+    with open('/content/results.txt', 'w') as file:
+        file.writelines(results)
 
 if __name__ == '__main__':
-    main(r'wavs/rmdmy.wav', embedding_per_second=1.2, overlap_rate=0.4)
-
+    main(r'/content/Bdb001.interaction.wav', embedding_per_second=1.2, overlap_rate=0.4)
